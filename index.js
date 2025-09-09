@@ -256,12 +256,10 @@ function endGame() {
       balance -= bettingAmount;
       console.log("5");
     } else {
-      balance += bettingAmount;
       console.log("6");
     }
   }
 
-  console.log("hei");
   balanceEl.textContent = "Balance: $" + balance;
   gameOver = true;
   return gameOver;
