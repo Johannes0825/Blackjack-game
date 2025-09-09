@@ -2,6 +2,7 @@ let playerHasBlackJack = false;
 let playerIsAlive = false;
 let dealerHasBlackJack = false;
 let dealerIsAlive = false;
+let gameOver = false;
 let message = "";
 let messageEl = document.getElementById("message-el");
 let playerSumEl = document.getElementById("player-sum-el");
@@ -63,6 +64,16 @@ function getRandomCard() {
   return { rank, suit, value };
 }
 
+function adjustAceValue(hand, sum) {
+  for (let card of hand) {
+    if (card.rank === "ace" && sum > 21 && card.value === 11) {
+      card.value = 1;
+      sum -= 10;
+    }
+  }
+  return sum;
+}
+
 function startGame() {
   bettingAmount = Number(betInput.value);
 
@@ -73,7 +84,7 @@ function startGame() {
 
   balance -= bettingAmount;
   updateBalance();
-
+  gameOver = false;
   playerIsAlive = true;
   playerHasBlackJack = false;
   playerHand = [];
@@ -82,7 +93,7 @@ function startGame() {
   dealerIsAlive = true;
   dealerHasBlackJack = false;
   dealerHand = [];
-  dealersum = 0;
+  dealerSum = 0;
 
   // nullstill kort container
   const playerCardsContainer = document.getElementById("player-cards");
@@ -116,13 +127,13 @@ function startGame() {
   console.log(dealerSecondCard);
 
   dealerSecondCard.classList.add("card");
-
+  console.log(gameOver);
   renderGame();
   return;
 }
 
 function hit() {
-  if (playerIsAlive && !playerHasBlackJack) {
+  if (!gameOver) {
     let newCard = getRandomCard();
     playerHand.push(newCard);
     playerSum += newCard.value;
@@ -132,11 +143,13 @@ function hit() {
     console.log(newCard);
 
     renderGame();
+    console.log(playerSum);
+    console.log(gameOver);
   }
 }
 
 function stand() {
-  if (dealerSum <= 17) {
+  if (!gameOver) {
     let dealerSecondCardData = getRandomCard();
     dealerHand.push(dealerSecondCardData);
     dealerSum += dealerSecondCardData.value;
@@ -145,34 +158,35 @@ function stand() {
     const dealerSecondCardImg = dealerCardsContainer.children[1];
     dealerSecondCardImg.src = `./cards/${dealerSecondCardData.rank}_of_${dealerSecondCardData.suit}.png`;
     dealerSecondCardImg.alt = `${dealerSecondCardData.rank} of ${dealerSecondCardData.suit}`;
+
+    while (dealerSum < 17 && dealerIsAlive) {
+      let newCard = getRandomCard();
+      dealerHand.push(newCard);
+      dealerSum += newCard.value;
+
+      addCardToDealer(newCard);
+      console.log(newCard);
+    }
+
+    renderGame();
+
+    if (dealerSum > 21) {
+      message = "Dealer has gone bust";
+      dealerIsAlive = false;
+    } else if (dealerSum == 21 && dealerSum > playerSum) {
+      message = "Dealer has blackjack";
+    } else if (dealerSum > playerSum) {
+      message = "Dealer won";
+    } else if (dealerSum == playerSum) {
+      message = "Its a push";
+    } else {
+      message = "You won";
+      dealerIsAlive = false;
+    }
+
+    endGame();
+    messageEl.textContent = message;
   }
-
-  while (dealerSum < 17 && dealerIsAlive) {
-    let newCard = getRandomCard();
-    dealerHand.push(newCard);
-    dealerSum += newCard.value;
-
-    addCardToDealer(newCard);
-    console.log(newCard);
-  }
-
-  renderGame();
-
-  if (dealerSum > 21) {
-    message = "Dealer has gone bust";
-    dealerIsAlive = false;
-  } else if (dealerSum == 21 && dealerSum > playerSum) {
-    message = "Dealer has blackjack";
-  } else if (dealerSum > playerSum) {
-    message = "Dealer won";
-  } else if (dealerSum == playerSum) {
-    message = "Its a push";
-  } else {
-    message = "You won";
-  }
-
-  endGame();
-  messageEl.textContent = message;
 }
 
 function addCardToPlayer(card) {
@@ -198,13 +212,15 @@ function addCardToDealer(card) {
 }
 
 function renderGame() {
+  playerSum = adjustAceValue(playerHand, playerSum);
+
   dealerSumEl.textContent = "Sum: " + dealerSum;
   playerSumEl.textContent = "Sum: " + playerSum;
 
-  if (playerSum > 21) {
+  if (playerSum >= 22) {
     message = "Bust!";
     playerIsAlive = false;
-    endGame();
+    gameOver = true;
   } else if (playerSum === 21) {
     message = "You got blackjack!";
     playerHasBlackJack = true;
@@ -216,15 +232,21 @@ function renderGame() {
 }
 
 function endGame() {
-  if (dealerIsAlive <= 17) {
+  if ((dealerIsAlive = true)) {
     balance += bettingAmount;
+
+    dealerSum = adjustAceValue(dealerHand, dealerSum);
 
     if (dealerSum > playerSum && dealerSum < 22) {
       balance -= bettingAmount;
-    } else if (dealerSum > 21) {
+      console.log("1");
+    } else if (dealerSum > 21 && !playerHasBlackJack) {
       balance += bettingAmount * 2;
       console.log("2");
-    } else if (dealerSum < playerSum && playerHasBlackJack) {
+    } else if (
+      (dealerSum < playerSum && playerHasBlackJack) ||
+      (playerHasBlackJack && !dealerIsAlive)
+    ) {
       balance += bettingAmount * 2.5;
       console.log("3");
     } else if (dealerSum < playerSum && playerSum < 21) {
@@ -232,13 +254,17 @@ function endGame() {
       console.log("4");
     } else if (playerSum > 21) {
       balance -= bettingAmount;
+      console.log("5");
     } else {
       balance += bettingAmount;
-      console.log("5");
+      console.log("6");
     }
   }
 
+  console.log("hei");
   balanceEl.textContent = "Balance: $" + balance;
+  gameOver = true;
+  return gameOver;
 }
 
 function updateBalance() {
