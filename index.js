@@ -35,7 +35,7 @@ const ranks = [
   "queen",
   "king",
 ];
-let suits = ["spades", "hearts", "clubs", "diamonds"];
+const suits = ["spades", "hearts", "clubs", "diamonds"];
 
 const betInput = document.getElementById("bet-input");
 betInput.addEventListener("keydown", function (event) {
@@ -78,7 +78,7 @@ function startGame() {
   bettingAmount = Number(betInput.value);
 
   if (bettingAmount <= 0 || bettingAmount > balance) {
-    messageEl.textContent = "Invalid bet amount!";
+    alert("Invalid bet amount!");
     return;
   }
 
