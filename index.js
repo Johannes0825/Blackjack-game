@@ -71,26 +71,6 @@ function drawCard(deck) {
 
 let deck = [];
 
-//Genererer et tilfeldig kort
-function getRandomCard() {
-  let rankIndex = Math.floor(Math.random() * ranks.length);
-  let suitIndex = Math.floor(Math.random() * suits.length);
-
-  let rank = ranks[rankIndex];
-  let suit = suits[suitIndex];
-
-  let value;
-  if (rank == "ace") {
-    value = 11;
-  } else if (["jack", "queen", "king"].includes(rank)) {
-    value = 10;
-  } else {
-    value = Number(rank);
-  }
-
-  return { rank, suit, value };
-}
-
 function adjustAceValue(hand, sum) {
   for (let card of hand) {
     if (card.rank === "ace" && sum > 21 && card.value === 11) {
@@ -113,7 +93,7 @@ function startGame() {
   console.log("Removing blink class");
   startBtnEl.classList.remove("blink-won");
   startBtnEl.classList.remove("blink-loss");
-  startBtnEl.classList.remove("blink-loss");
+  startBtnEl.classList.remove("blink-push");
 
   balance -= bettingAmount;
   updateBalance();
@@ -123,6 +103,8 @@ function startGame() {
   playerHand = [];
   playerSum = 0;
   double = false;
+  playerWon = false;
+  push = false;
 
   dealerIsAlive = true;
   dealerHasBlackJack = false;
@@ -173,6 +155,7 @@ function startGame() {
     updateBalance();
     gameOver = true;
     playerWon = true;
+    endGame();
   }
 
   renderGame();
@@ -303,6 +286,7 @@ function renderGame() {
     playerIsAlive = false;
     gameOver = true;
     playerWon = false;
+    endGame();
   } else if (playerSum === 21) {
     message = "You got blackjack!";
     playerHasBlackJack = true;
@@ -315,7 +299,7 @@ function renderGame() {
 }
 
 function endGame() {
-  if ((dealerIsAlive = true)) {
+  if (dealerIsAlive == true) {
     console.log(bettingAmount);
 
     balance += bettingAmount;
