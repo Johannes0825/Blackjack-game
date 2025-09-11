@@ -299,33 +299,31 @@ function renderGame() {
 }
 
 function endGame() {
-  if (dealerIsAlive == true) {
-    console.log(bettingAmount);
+  console.log(bettingAmount);
 
+  balance += bettingAmount;
+
+  dealerSum = adjustAceValue(dealerHand, dealerSum);
+
+  if (dealerSum > playerSum && dealerSum < 22) {
+    balance -= bettingAmount;
+    console.log("1");
+    playerWon = false;
+  } else if (dealerSum > 21 && !playerHasBlackJack) {
     balance += bettingAmount;
-
-    dealerSum = adjustAceValue(dealerHand, dealerSum);
-
-    if (dealerSum > playerSum && dealerSum < 22) {
-      balance -= bettingAmount;
-      console.log("1");
-      playerWon = false;
-    } else if (dealerSum > 21 && !playerHasBlackJack) {
-      balance += bettingAmount;
-      console.log("2");
-      playerWon = true;
-    } else if (dealerSum < playerSum && playerSum < 21) {
-      balance += bettingAmount;
-      console.log("3");
-      playerWon = true;
-    } else if (playerSum > 21) {
-      balance -= bettingAmount;
-      console.log("4");
-      playerWon = false;
-    } else {
-      console.log("5");
-      push = true;
-    }
+    console.log("2");
+    playerWon = true;
+  } else if (dealerSum < playerSum && playerSum < 21) {
+    balance += bettingAmount;
+    console.log("3");
+    playerWon = true;
+  } else if (playerSum > 21) {
+    balance -= bettingAmount;
+    console.log("4");
+    playerWon = false;
+  } else {
+    console.log("5");
+    push = true;
   }
 
   balanceEl.textContent = "Balance: $" + balance;
